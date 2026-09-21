@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 
 # ──────────────────────────────────────────────
 # 기본 설정
@@ -69,7 +70,7 @@ if movie_df["날짜"].nunique() == 1:
     only_date = movie_df["날짜"].iloc[0]
     fig1.update_xaxes(range=[only_date - pd.Timedelta(days=1), only_date + pd.Timedelta(days=1)])
 
-st.plotly_chart(fig1, use_container_width=True)
+st.plotly_chart(fig1, use_container_width=True, key="fig1_movie_daily_line")
 
 # 이 그래프로 알 수 있는 것: 아래 문장을 원하는 내용으로 바꿔서 쓰세요.
 st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 이 그래프에서 읽을 수 있는 한 문장을 적어주세요)")
@@ -105,7 +106,7 @@ fig2.update_layout(hovermode="x unified")
 fig2.update_xaxes(tickformat="%Y-%m-%d")
 
 # 범례는 기본적으로 클릭하면 해당 영화 선을 껐다 켰다 할 수 있어요.
-st.plotly_chart(fig2, use_container_width=True)
+st.plotly_chart(fig2, use_container_width=True, key="fig2_top5_lines")
 
 st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 이 그래프에서 읽을 수 있는 한 문장을 적어주세요)")
 
@@ -119,16 +120,53 @@ st.header("3. 날짜별 10위권 전체 관객수 합계")
 # 날짜별로 그날 10위권에 든 영화들의 일관객을 모두 더합니다.
 daily_total = df.groupby("날짜")["일관객"].sum().reset_index(name="합계")
 
-fig3 = px.area(
-    daily_total,
-    x="날짜",
-    y="합계",
+fig3 = go.Figure()
+
+# 영역 그래프(면적 채우기 선 그래프)를 직접 그립니다.
+fig3.add_trace(go.Scatter(
+    x=daily_total["날짜"],
+    y=daily_total["합계"],
+    mode="lines",
+    fill="tozeroy",  # 선 아래를 색으로 채워서 영역 그래프처럼 보이게 합니다.
+    line=dict(color="#4C78A8"),
+    name="일별 합계",
+    hovertemplate="날짜: %{x|%Y-%m-%d}<br>합계: %{y:,}명<extra></extra>",
+))
+
+# 합계가 가장 컸던 3일을 찾아서 그래프 위에 점과 날짜 글자로 표시합니다.
+top3_days = daily_total.sort_values("합계", ascending=False).head(3)
+
+fig3.add_trace(go.Scatter(
+    x=top3_days["날짜"],
+    y=top3_days["합계"],
+    mode="markers+text",
+    marker=dict(size=11, color="red"),
+    text=top3_days["날짜"].dt.strftime("%Y-%m-%d"),
+    textposition="top center",
+    textfont=dict(color="red", size=13),
+    name="합계 상위 3일",
+    hovertemplate="날짜: %{x|%Y-%m-%d}<br>합계: %{y:,}명<extra>상위 3일</extra>",
+))
+
+fig3.update_layout(
     title="날짜별 10위권 전체 관객수 합계",
-    labels={"날짜": "날짜", "합계": "그날 10위권 전체 관객수(명)"},
-)
-fig3.update_traces(
-    hovertemplate="날짜: %{x|%Y-%m-%d}<br>합계: %{y:,}명<extra></extra>"
+    xaxis_title="날짜",
+    yaxis_title="그날 10위권 전체 관객수(명)",
 )
 fig3.update_xaxes(tickformat="%Y-%m-%d")
 
-# 합계가 가장 컸던 3일을 찾아서
+st.plotly_chart(fig3, use_container_width=True, key="fig3_daily_total_area")
+
+st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 이 그래프에서 읽을 수 있는 한 문장을 적어주세요)")
+
+st.divider()
+
+# ══════════════════════════════════════════════
+# 섹션 4. (다음 '시간' 관련 그래프는 여기에 추가하세요)
+# ══════════════════════════════════════════════
+# 예시:
+# st.header("4. 요일별 평균 관객수")
+# fig4 = px.bar(...)
+# st.plotly_chart(fig4, use_container_width=True)
+# st.info("💡 **이 그래프로 알 수 있는 것:** ...")
+# st.divider()
