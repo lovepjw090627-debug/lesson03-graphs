@@ -162,11 +162,57 @@ st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 이 그래프�
 st.divider()
 
 # ══════════════════════════════════════════════
-# 섹션 4. (다음 '시간' 관련 그래프는 여기에 추가하세요)
+# 섹션 4. 일관객 합계 TOP 10 영화
+# ══════════════════════════════════════════════
+st.header("4. 일관객 합계 TOP 10 영화")
+
+# 영화별로 이 기간의 일관객을 모두 더하고, 10위권에 든 날수(행 개수)도 함께 셉니다.
+movie_summary = (
+    df.groupby("영화명")
+    .agg(합계=("일관객", "sum"), 상위권일수=("날짜", "count"))
+    .reset_index()
+)
+
+top10_movies = movie_summary.sort_values("합계", ascending=False).head(10)
+
+# 가로 막대그래프는 데이터 순서대로 아래에서 위로 쌓이기 때문에,
+# 관객이 많은 영화가 맨 위에 오도록 오름차순(작은 값이 먼저)으로 다시 정렬합니다.
+top10_movies = top10_movies.sort_values("합계", ascending=True)
+
+fig4 = go.Figure()
+
+fig4.add_trace(go.Bar(
+    x=top10_movies["합계"],
+    y=top10_movies["영화명"],
+    orientation="h",
+    marker=dict(color="#4C78A8"),
+    customdata=top10_movies["상위권일수"],
+    hovertemplate=(
+        "영화: %{y}<br>"
+        "합계 관객수: %{x:,}명<br>"
+        "10위권에 든 날수: %{customdata}일"
+        "<extra></extra>"
+    ),
+))
+
+fig4.update_layout(
+    title="일관객 합계 TOP 10 영화",
+    xaxis_title="합계 관객수(명)",
+    yaxis_title="",
+)
+
+st.plotly_chart(fig4, use_container_width=True, key="fig4_top10_bar")
+
+st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 이 그래프에서 읽을 수 있는 한 문장을 적어주세요)")
+
+st.divider()
+
+# ══════════════════════════════════════════════
+# 섹션 5. (다음 '시간' 관련 그래프는 여기에 추가하세요)
 # ══════════════════════════════════════════════
 # 예시:
-# st.header("4. 요일별 평균 관객수")
-# fig4 = px.bar(...)
-# st.plotly_chart(fig4, use_container_width=True)
+# st.header("5. 요일별 평균 관객수")
+# fig5 = px.bar(...)
+# st.plotly_chart(fig5, use_container_width=True)
 # st.info("💡 **이 그래프로 알 수 있는 것:** ...")
 # st.divider()
