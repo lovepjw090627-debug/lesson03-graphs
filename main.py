@@ -208,11 +208,59 @@ st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 이 그래프�
 st.divider()
 
 # ══════════════════════════════════════════════
-# 섹션 5. (다음 '시간' 관련 그래프는 여기에 추가하세요)
+# 섹션 5. 월 × 요일별 일관객 합계 히트맵
+# ══════════════════════════════════════════════
+st.header("5. 월 × 요일별 일관객 합계")
+
+# 날짜에서 월(1~12)과 요일을 뽑아냅니다.
+df["월"] = df["날짜"].dt.month
+df["요일번호"] = df["날짜"].dt.weekday  # 0=월요일 ... 6=일요일
+
+weekday_names = ["월", "화", "수", "목", "금", "토", "일"]
+
+# 월 × 요일 조합별로 일관객을 다 더합니다.
+# pivot_table을 쓰면 데이터가 없는 조합은 자동으로 0으로 채워줍니다.
+heatmap_data = df.pivot_table(
+    index="요일번호",
+    columns="월",
+    values="일관객",
+    aggfunc="sum",
+    fill_value=0,
+)
+
+# 요일은 월요일(0)부터 일요일(6) 순서로, 월은 1월부터 12월 순서로 정렬합니다.
+heatmap_data = heatmap_data.reindex(index=range(7), columns=range(1, 13), fill_value=0)
+
+fig5 = go.Figure(data=go.Heatmap(
+    z=heatmap_data.values,
+    x=[f"{m}월" for m in heatmap_data.columns],
+    y=weekday_names,
+    colorscale="Blues",  # 값이 클수록(관객이 많을수록) 색이 진해집니다.
+    hovertemplate="%{x} %{y}요일<br>합계 관객수: %{z:,}명<extra></extra>",
+    colorbar=dict(title="관객수(명)"),
+))
+
+fig5.update_layout(
+    title="월 × 요일별 일관객 합계",
+    xaxis_title="월",
+    yaxis_title="요일",
+)
+# y축 기본 방향은 아래에서 위로 쌓이므로, 뒤집어서 월요일이 맨 위,
+# 일요일이 맨 아래로 오는 자연스러운 순서로 보이게 합니다.
+fig5.update_yaxes(autorange="reversed")
+
+st.plotly_chart(fig5, use_container_width=True, key="fig5_month_weekday_heatmap")
+
+st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 이 그래프에서 읽을 수 있는 한 문장을 적어주세요)")
+
+st.divider()
+
+# ══════════════════════════════════════════════
+# 섹션 6. (다음 '시간' 관련 그래프는 여기에 추가하세요)
 # ══════════════════════════════════════════════
 # 예시:
-# st.header("5. 요일별 평균 관객수")
-# fig5 = px.bar(...)
-# st.plotly_chart(fig5, use_container_width=True)
+# st.header("6. ...")
+# fig6 = px.bar(...)
+# st.plotly_chart(fig6, use_container_width=True)
 # st.info("💡 **이 그래프로 알 수 있는 것:** ...")
 # st.divider()
