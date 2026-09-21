@@ -112,11 +112,23 @@ st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 이 그래프�
 st.divider()
 
 # ══════════════════════════════════════════════
-# 섹션 3. (다음 '시간' 관련 그래프는 여기에 추가하세요)
+# 섹션 3. 날짜별 10위권 전체 관객수 합계
 # ══════════════════════════════════════════════
-# 예시:
-# st.header("3. 요일별 평균 관객수")
-# fig3 = px.bar(...)
-# st.plotly_chart(fig3, use_container_width=True)
-# st.info("💡 **이 그래프로 알 수 있는 것:** ...")
-# st.divider()
+st.header("3. 날짜별 10위권 전체 관객수 합계")
+
+# 날짜별로 그날 10위권에 든 영화들의 일관객을 모두 더합니다.
+daily_total = df.groupby("날짜")["일관객"].sum().reset_index(name="합계")
+
+fig3 = px.area(
+    daily_total,
+    x="날짜",
+    y="합계",
+    title="날짜별 10위권 전체 관객수 합계",
+    labels={"날짜": "날짜", "합계": "그날 10위권 전체 관객수(명)"},
+)
+fig3.update_traces(
+    hovertemplate="날짜: %{x|%Y-%m-%d}<br>합계: %{y:,}명<extra></extra>"
+)
+fig3.update_xaxes(tickformat="%Y-%m-%d")
+
+# 합계가 가장 컸던 3일을 찾아서
