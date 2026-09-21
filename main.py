@@ -77,11 +77,46 @@ st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 이 그래프�
 st.divider()
 
 # ══════════════════════════════════════════════
-# 섹션 2. (다음 '시간' 관련 그래프는 여기에 추가하세요)
+# 섹션 2. 기간 내 일관객 합계 상위 5편 비교
+# ══════════════════════════════════════════════
+st.header("2. 일관객 합계 상위 5편의 날짜별 관객수")
+
+# 영화별로 전체 기간의 일관객을 다 더해서, 합계가 큰 순서로 5편을 뽑습니다.
+top5_names = (
+    df.groupby("영화명")["일관객"].sum().sort_values(ascending=False).head(5).index
+)
+
+top5_df = df[df["영화명"].isin(top5_names)].sort_values("날짜")
+
+fig2 = px.line(
+    top5_df,
+    x="날짜",
+    y="일관객",
+    color="영화명",  # 영화마다 다른 색으로 구분합니다.
+    markers=True,
+    title="일관객 합계 상위 5편의 날짜별 관객수 변화",
+    labels={"날짜": "날짜", "일관객": "일일 관객수(명)", "영화명": "영화"},
+)
+
+fig2.update_traces(
+    hovertemplate="날짜: %{x|%Y-%m-%d}<br>관객수: %{y:,}명<extra>%{fullData.name}</extra>"
+)
+fig2.update_layout(hovermode="x unified")
+fig2.update_xaxes(tickformat="%Y-%m-%d")
+
+# 범례는 기본적으로 클릭하면 해당 영화 선을 껐다 켰다 할 수 있어요.
+st.plotly_chart(fig2, use_container_width=True)
+
+st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 이 그래프에서 읽을 수 있는 한 문장을 적어주세요)")
+
+st.divider()
+
+# ══════════════════════════════════════════════
+# 섹션 3. (다음 '시간' 관련 그래프는 여기에 추가하세요)
 # ══════════════════════════════════════════════
 # 예시:
-# st.header("2. 요일별 평균 관객수")
-# fig2 = px.bar(...)
-# st.plotly_chart(fig2, use_container_width=True)
+# st.header("3. 요일별 평균 관객수")
+# fig3 = px.bar(...)
+# st.plotly_chart(fig3, use_container_width=True)
 # st.info("💡 **이 그래프로 알 수 있는 것:** ...")
 # st.divider()
