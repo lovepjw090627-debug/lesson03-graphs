@@ -60,6 +60,15 @@ fig1.update_traces(
 )
 fig1.update_layout(hovermode="x unified")
 
+# x축을 항상 'YYYY-MM-DD' 형식의 날짜로 보여줍니다.
+# (하루치 기록만 있는 영화를 고르면 날짜 범위가 0이 되어 Plotly가 자동으로
+#  시:분:초 단위 눈금을 그리는 문제가 있어서, 그런 경우엔 눈금 범위를
+#  하루 앞뒤로 살짝 넓혀서 날짜만 깔끔하게 보이도록 합니다.)
+fig1.update_xaxes(tickformat="%Y-%m-%d")
+if movie_df["날짜"].nunique() == 1:
+    only_date = movie_df["날짜"].iloc[0]
+    fig1.update_xaxes(range=[only_date - pd.Timedelta(days=1), only_date + pd.Timedelta(days=1)])
+
 st.plotly_chart(fig1, use_container_width=True)
 
 # 이 그래프로 알 수 있는 것: 아래 문장을 원하는 내용으로 바꿔서 쓰세요.
